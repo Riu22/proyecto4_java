@@ -81,8 +81,6 @@ public class LightBot {
                 for (int rep = 0; rep < n; rep++) {
                     execute(block);
                 }
-            } else if (cmd.equals("ENDREPEAT")) {
-                // Should not reach here, handled in parsing
             } else {
                 doInstruction(cmd);
             }
