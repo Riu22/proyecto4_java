@@ -87,7 +87,7 @@ public class LightBot {
                 int n = Integer.parseInt(cmd.substring(7).trim());
                 int depth = 1;
                 List<String> block = new ArrayList<>();
-                i++;  // Avanzar
+                i++;
                 while (i < code.size() && depth > 0) {
                     String subCmd = code.get(i).trim();
                     if (subCmd.startsWith("REPEAT ")) {
