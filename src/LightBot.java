@@ -1,27 +1,18 @@
+import java.util.*;
+
 public class LightBot {
-    // Graella inicial i actual
     private char[][] initialMap;
     private char[][] map;
     private int width, height;
-
-    // Posició i direcció del robot
     private int startX, startY, robotX, robotY;
-    private int startDir, robotDir; // 0:dreta, 1:abaix, 2:esquerra, 3:amunt
-
-    // Vectors de moviment segons la direcció
+    private int startDir, robotDir;
     private static final int[] DX = {1, 0, -1, 0};
     private static final int[] DY = {0, 1, 0, -1};
 
-    /**
-     * Constructor que accepta directament String[] (una línia per fila).
-     */
     public LightBot(String[] lines) {
         this(String.join("\n", lines));
     }
 
-    /**
-     * Constructor que accepta un String amb enters (\n) de separació de línies.
-     */
     public LightBot(String mapString) {
         String[] lines = mapString.split("\n");
         height = lines.length;
@@ -30,13 +21,11 @@ public class LightBot {
         map = new char[height][width];
         startX = startY = -1;
         startDir = 0;
-
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 char c = lines[y].charAt(x);
                 initialMap[y][x] = c;
                 map[y][x] = c;
-                // Busquem el robot
                 if ("RLUD".indexOf(c) > -1) {
                     startX = x;
                     startY = y;
@@ -46,22 +35,16 @@ public class LightBot {
                         case 'L': startDir = 2; break;
                         case 'U': startDir = 3; break;
                     }
-                    // Després de guardar la posició inicial, deixem aquella cel·la buida ('.')
                     initialMap[y][x] = '.';
                     map[y][x] = '.';
                 }
             }
         }
-
         if (startX == -1 || startY == -1)
             throw new IllegalArgumentException("No s'ha trobat el robot!");
-
         reset();
     }
 
-    /**
-     * Restaura l'estat inicial del robot i del mapa.
-     */
     public void reset() {
         for (int y = 0; y < height; y++)
             for (int x = 0; x < width; x++)
@@ -71,23 +54,46 @@ public class LightBot {
         robotDir = startDir;
     }
 
-    /**
-     * Executa una seqüència d'instruccions.
-     */
     public void runProgram(String[] inst) {
-        for (String cmd : inst)
-            doInstruction(cmd);
+        List<String> code = Arrays.asList(inst);
+        execute(code);
     }
 
-    /**
-     * Executa una sola instrucció.
-     */
+    private void execute(List<String> code) {
+        for (int i = 0; i < code.size(); i++) {
+            String cmd = code.get(i);
+            if (cmd.startsWith("REPEAT ")) {
+                int n = Integer.parseInt(cmd.substring(7).trim());
+                int depth = 1;
+                List<String> block = new ArrayList<>();
+                i++;
+                while (i < code.size() && depth > 0) {
+                    String subCmd = code.get(i);
+                    if (subCmd.startsWith("REPEAT ")) {
+                        depth++;
+                    } else if (subCmd.equals("ENDREPEAT")) {
+                        depth--;
+                        if (depth == 0) break;
+                    }
+                    if (depth > 0) block.add(subCmd);
+                    i++;
+                }
+                for (int rep = 0; rep < n; rep++) {
+                    execute(block);
+                }
+            } else if (cmd.equals("ENDREPEAT")) {
+                // Should not reach here, handled in parsing
+            } else {
+                doInstruction(cmd);
+            }
+        }
+    }
+
     private void doInstruction(String cmd) {
         switch (cmd) {
-            case "FORWARD":
+            case "FORWARD": {
                 int nx = robotX + DX[robotDir];
                 int ny = robotY + DY[robotDir];
-                // Wrap-around estilo pacman
                 if (nx < 0) nx = width - 1;
                 if (nx >= width) nx = 0;
                 if (ny < 0) ny = height - 1;
@@ -97,6 +103,7 @@ public class LightBot {
                     robotY = ny;
                 }
                 break;
+            }
             case "LEFT":
                 robotDir = (robotDir + 3) % 4;
                 break;
@@ -106,24 +113,15 @@ public class LightBot {
             case "LIGHT":
                 if (map[robotY][robotX] == 'O') {
                     map[robotY][robotX] = 'X';
-                } else if (map[robotY][robotX] == '.' || map[robotY][robotX] == 'X') {
-                    map[robotY][robotX] = 'x';
                 }
-                // Si està en una 'x' ja, no canvia
                 break;
         }
     }
 
-    /**
-     * Retorna la posició actual del robot: [columna, fila]
-     */
     public int[] getRobotPosition() {
         return new int[]{robotX, robotY};
     }
 
-    /**
-     * Retorna el mapa actualitzat en format String[] (una línia per fila)
-     */
     public String[] getMap() {
         String[] result = new String[height];
         for (int y = 0; y < height; y++) {
