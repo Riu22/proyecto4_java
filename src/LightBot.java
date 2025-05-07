@@ -1,4 +1,5 @@
 import java.util.*;
+;
 
 public class LightBot {
     private char[][] initialMap;
@@ -146,26 +147,26 @@ public class LightBot {
         return result;
     }
 
-    // Clase para manejar funciones
-    public static class UserFunction {
-        private String name;
-        private List<String> instructions;
+}
 
-        public UserFunction(String name) {
-            this.name = name;
-            this.instructions = new ArrayList<>();
-        }
+class UserFunction {
+    private String name;
+    private List<String> instructions;
 
-        public void addInstruction(String instruction) {
-            instructions.add(instruction);
-        }
+    public UserFunction(String name) {
+        this.name = name;
+        this.instructions = new ArrayList<>();
+    }
 
-        public String getName() {
-            return name;
-        }
+    public void addInstruction(String instruction) {
+        instructions.add(instruction);
+    }
 
-        public List<String> getInstructions() {
-            return instructions;
-        }
+    public String getName() {
+        return name;
+    }
+
+    public List<String> getInstructions() {
+        return instructions;
     }
 }
