@@ -1,8 +1,3 @@
-/**
- * Classe que representa un robot LightBot que es mou en una graella amb bombetes.
- * Admet inicialització amb String[] o String (amb \n)
- * Autor: ChatGPT | Data: 2024
- */
 public class LightBot {
     // Graella inicial i actual
     private char[][] initialMap;
