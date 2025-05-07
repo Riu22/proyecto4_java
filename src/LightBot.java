@@ -87,8 +87,12 @@ public class LightBot {
             case "FORWARD":
                 int nx = robotX + DX[robotDir];
                 int ny = robotY + DY[robotDir];
-                if (nx >= 0 && nx < width && ny >= 0 && ny < height
-                        && (map[ny][nx] == '.' || map[ny][nx] == 'O' || map[ny][nx] == 'X')) {
+                // Wrap-around estilo pacman
+                if (nx < 0) nx = width - 1;
+                if (nx >= width) nx = 0;
+                if (ny < 0) ny = height - 1;
+                if (ny >= height) ny = 0;
+                if (map[ny][nx] == '.' || map[ny][nx] == 'O' || map[ny][nx] == 'X') {
                     robotX = nx;
                     robotY = ny;
                 }
