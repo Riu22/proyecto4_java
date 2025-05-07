@@ -9,7 +9,7 @@ public class LightBot {
     private int startDir, robotDir;
     private static final int[] DX = {1, 0, -1, 0}; // Derecha, Abajo, Izquierda, Arriba
     private static final int[] DY = {0, 1, 0, -1};
-    private Map<String, UserFunction> functions = new HashMap<>(); // Usar la nueva clase
+    private Map<String, UserFunction> functions = new HashMap<>();
 
     public LightBot(String[] lines) {
         this(String.join("\n", lines));
