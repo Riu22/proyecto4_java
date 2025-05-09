@@ -1,4 +1,60 @@
 import java.util.*;
+
+// Interfaz para instrucciones ejecutables
+interface Instruction {
+    void execute(LightBot bot);  // Ejecuta la instrucción en el bot
+}
+
+// Clase para representar una función de usuario
+class UserFunction {
+    private final String name;  // Nombre de la función
+    private final List<Instruction> instructions;  // Instrucciones de la función
+
+    public UserFunction(String name, List<Instruction> instructions) {
+        this.name = name;
+        this.instructions = instructions;
+    }
+
+    public String getName() { return name; }
+    public List<Instruction> getInstructions() { return instructions; }
+}
+
+// Clase para instrucciones simples
+class SimpleInstruction implements Instruction {
+    private final String cmd;  // Comando a ejecutar
+    public SimpleInstruction(String cmd) { this.cmd = cmd; }
+    public void execute(LightBot bot) { bot.doInstruction(cmd); }
+}
+
+// Clase para llamadas a funciones de usuario
+class UserFunctionInstruction implements Instruction {
+    private final String funcName;  // Nombre de la función
+    public UserFunctionInstruction(String funcName) { this.funcName = funcName; }
+
+    public void execute(LightBot bot) {
+        UserFunction func = bot.getFunction(funcName); // Usamos el getter público
+        if (func != null) {
+            for (Instruction instr : func.getInstructions()) {
+                instr.execute(bot);
+            }
+        }
+    }
+}
+
+// Clase para bloques de repetición
+class RepeatBlock implements Instruction {
+    private final int times;  // Número de repeticiones
+    private final List<Instruction> instructions;  // Instrucciones a repetir
+    public RepeatBlock(int times, List<Instruction> instructions) { this.times = times; this.instructions = instructions; }
+    public void execute(LightBot bot) {
+        for (int i = 0; i < times; i++) {
+            for (Instruction instr : instructions) {
+                instr.execute(bot);
+            }
+        }
+    }
+}
+
 public class LightBot {
     // Campos principales para el mapa, posición y dirección del robot
     private char[][] initialMap;  // Mapa inicial
@@ -15,7 +71,6 @@ public class LightBot {
     public LightBot(String[] lines) {
         this(String.join("\n", lines));  // Une las líneas y pasa a otro constructor
     }
-
     // Constructor principal que inicializa el mapa y el robot
     public LightBot(String mapString) {
         String[] lines = mapString.split("\n");
@@ -48,7 +103,6 @@ public class LightBot {
             throw new IllegalArgumentException("No s'ha trobat el robot!");
         reset();
     }
-
     // Método para resetear el estado inicial
     public void reset() {
         for (int y = 0; y < height; y++) {
@@ -60,7 +114,6 @@ public class LightBot {
         robotY = startY;
         robotDir = startDir;
     }
-
     // Método para ejecutar el programa
     public void runProgram(String[] programLines) {
         List<String> code = Arrays.asList(programLines);
@@ -70,55 +123,6 @@ public class LightBot {
         for (Instruction instr : mainInstructions) {
             instr.execute(this);
         }
-    }
-
-    // Interfaz para instrucciones ejecutables
-    interface Instruction {
-        void execute(LightBot bot);  // Ejecuta la instrucción en el bot
-    }
-
-    // Clase para instrucciones simples
-    static class SimpleInstruction implements Instruction {
-        private final String cmd;  // Comando a ejecutar
-        public SimpleInstruction(String cmd) { this.cmd = cmd; }
-        public void execute(LightBot bot) { bot.doInstruction(cmd); }
-    }
-
-    // Clase para bloques de repetición
-    static class RepeatBlock implements Instruction {
-        private final int times;  // Número de repeticiones
-        private final List<Instruction> instructions;  // Instrucciones a repetir
-        public RepeatBlock(int times, List<Instruction> instructions) { this.times = times; this.instructions = instructions; }
-        public void execute(LightBot bot) {
-            for (int i = 0; i < times; i++) {
-                for (Instruction instr : instructions) {
-                    instr.execute(bot);
-                }
-            }
-        }
-    }
-
-    // Clase para llamadas a funciones de usuario
-    static class UserFunctionInstruction implements Instruction {
-        private final String funcName;  // Nombre de la función
-        public UserFunctionInstruction(String funcName) { this.funcName = funcName; }
-        public void execute(LightBot bot) {
-            UserFunction func = bot.functions.get(funcName);
-            if (func != null) {
-                for (Instruction instr : func.getInstructions()) {
-                    instr.execute(bot);
-                }
-            }
-        }
-    }
-
-    // Clase para representar una función de usuario
-    static class UserFunction {
-        private final String name;  // Nombre de la función
-        private final List<Instruction> instructions;  // Instrucciones de la función
-        public UserFunction(String name, List<Instruction> instructions) { this.name = name; this.instructions = instructions; }
-        public String getName() { return name; }
-        public List<Instruction> getInstructions() { return instructions; }
     }
 
     // Método para parsear funciones del código
@@ -137,7 +141,6 @@ public class LightBot {
             }
         }
     }
-
     // Método para parsear instrucciones
     private List<Instruction> parseInstructions(List<String> code, int from, int to) {
         List<Instruction> result = new ArrayList<>();
@@ -173,9 +176,8 @@ public class LightBot {
         }
         return result;
     }
-
     // Método para ejecutar una instrucción simple
-    private void doInstruction(String cmd) {
+    void doInstruction(String cmd) { // Lo dejo package-private para acceso desde las instrucciones
         switch (cmd) {
             case "FORWARD":
                 int nx = robotX + DX[robotDir];
@@ -203,11 +205,15 @@ public class LightBot {
         }
     }
 
+    // Método para obtener una función por nombre
+    public UserFunction getFunction(String name) {
+        return functions.get(name);
+    }
+
     // Método para obtener la posición del robot
     public int[] getRobotPosition() {
         return new int[]{robotX, robotY};
     }
-
     // Método para obtener el mapa actual
     public String[] getMap() {
         String[] result = new String[height];
