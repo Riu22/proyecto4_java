@@ -23,7 +23,7 @@ class SimpleInstruction implements Instruction {
     public SimpleInstruction(String cmd) { this.cmd = cmd; }
     public void execute(LightBot bot) { bot.doInstruction(cmd); }
 }
-// Llamada a función parametrizada (CALL FOO(3,5))
+// Llamada a función con parametros
 class UserFunctionCall implements Instruction {
     private final String funcName;
     private final List<String> argExprs;
