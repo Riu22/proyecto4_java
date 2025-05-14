@@ -246,25 +246,43 @@ public class LightBot {
         return functions.get(name);
     }
 
+    // Añade un nuevo contexto/local frame donde se guardan los parámetros y sus valores
+// Esto simula la "memoria local" de una función cuando esta es llamada
+// paramNames: lista de nombres de parámetros (ej. ["n", "m"])
+// argValues: valores con los que se llama la función (ej. [5, 3])
     void pushFrame(List<String> paramNames, List<Integer> argValues) {
         Map<String,Integer> frame = new HashMap<>();
+        // Por cada parámetro, asociamos el nombre con su valor correspondiente
         for (int i = 0; i < paramNames.size(); i++)
             frame.put(paramNames.get(i), argValues.get(i));
+        // Esta nueva tabla de variables se guarda "arriba" de la pila de contextos
+        // Significa que ahora esta función tiene su propio espacio para las variables
         locals.push(frame);
     }
 
+    // Elimina el contexto local superior cuando una función termina su ejecución
+// Esto es necesario para que al salir de la función, las variables locales desaparezcan
+// y no interfieran con el resto del programa o con otras llamadas
     void popFrame() {
         if (!locals.isEmpty())
             locals.pop();
     }
 
+    // Evalúa el valor de una expresión entera
+// Si expr es un número (ej. "5"), lo convierte y devuelve
+// Si expr es un nombre de variable (ej. "n") busca el valor en la pila de contextos
+// Es decir, busca el valor actual de ese parámetro o variable local para devolverlo
     int evalExpr(String expr) {
         try {
+            // Intentamos interpretar expr directamente como número
             return Integer.parseInt(expr);
         } catch (NumberFormatException nfe) {
+            // No es un número, debe ser un nombre de variable
+            // Buscamos en cada contexto local desde el más reciente hacia atrás
             for (Map<String,Integer> frame : locals)
                 if (frame.containsKey(expr))
                     return frame.get(expr);
+            // Si no encontramos el nombre, lanzamos error indicándolo
             throw new IllegalArgumentException("Parámetro o valor inválido: " + expr);
         }
     }
