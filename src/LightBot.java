@@ -1,39 +1,32 @@
 import java.util.*;
-
 // Interfaz para instrucciones ejecutables
 interface Instruction {
     void execute(LightBot bot);
 }
-
 // Representa una función (con o sin parámetros)
 class UserFunction {
     private final String name;
     private final List<String> paramNames; // Nombres de los parámetros
     private final List<Instruction> instructions;
-
     public UserFunction(String name, List<String> paramNames, List<Instruction> instructions) {
         this.name = name;
         this.paramNames = paramNames;
         this.instructions = instructions;
     }
-
     public String getName() { return name; }
     public List<String> getParamNames() { return paramNames; }
     public List<Instruction> getInstructions() { return instructions; }
 }
-
 // Instrucción simple: FORWARD, LEFT, RIGHT, LIGHT
 class SimpleInstruction implements Instruction {
     private final String cmd;
     public SimpleInstruction(String cmd) { this.cmd = cmd; }
     public void execute(LightBot bot) { bot.doInstruction(cmd); }
 }
-
 // Llamada a función parametrizada (CALL FOO(3,5))
 class UserFunctionCall implements Instruction {
     private final String funcName;
     private final List<String> argExprs;
-
     public UserFunctionCall(String funcName, List<String> argExprs) {
         this.funcName = funcName;
         this.argExprs = argExprs;
@@ -50,12 +43,10 @@ class UserFunctionCall implements Instruction {
         bot.popFrame();
     }
 }
-
 // Bloque REPEAT parametrizado (REPEAT N)
 class ParamRepeatBlock implements Instruction {
     private final String timesExpr;
     private final List<Instruction> instructions;
-
     public ParamRepeatBlock(String timesExpr, List<Instruction> instructions) {
         this.timesExpr = timesExpr;
         this.instructions = instructions;
@@ -67,7 +58,6 @@ class ParamRepeatBlock implements Instruction {
                 instr.execute(bot);
     }
 }
-
 public class LightBot {
     private char[][] initialMap;
     private char[][] map;
@@ -77,9 +67,8 @@ public class LightBot {
     private int startDir, robotDir;
     private final Map<String, UserFunction> functions = new HashMap<>();
     private final Deque<Map<String,Integer>> locals = new ArrayDeque<>();
-    private static final int[] DX = {1, 0, -1, 0};
+    private static final int[] DX = {1, 0, -1, 0};  // Derecha, Abajo, Izquierda, Arriba
     private static final int[] DY = {0, 1, 0, -1};
-
     public LightBot(String[] lines) {
         this(String.join("\n", lines));
     }
@@ -114,7 +103,6 @@ public class LightBot {
             throw new IllegalArgumentException("No s'ha trobat el robot!");
         reset();
     }
-
     public void reset() {
         for (int y = 0; y < height; y++)
             for (int x = 0; x < width; x++)
@@ -124,7 +112,6 @@ public class LightBot {
         robotDir = startDir;
         locals.clear();
     }
-
     public void runProgram(String[] programLines) {
         List<String> code = Arrays.asList(programLines);
         functions.clear();
@@ -136,7 +123,6 @@ public class LightBot {
             instr.execute(this);
         }
     }
-
     // Analiza las funciones primero
     private void parseFunctions(List<String> code) {
         for (int i = 0; i < code.size(); i++) {
@@ -161,11 +147,10 @@ public class LightBot {
                     end++;
                 List<Instruction> funcInstructions = parseInstructions(code, start, end);
                 functions.put(funcName, new UserFunction(funcName, paramNames, funcInstructions));
-                i = end;
+                i = end;  // Avanza al final de la función
             }
         }
     }
-
     // Parser de instrucciones
     private List<Instruction> parseInstructions(List<String> code, int from, int to) {
         List<Instruction> result = new ArrayList<>();
@@ -212,7 +197,6 @@ public class LightBot {
         }
         return result;
     }
-
     // Ejecuta una instrucción simple
     void doInstruction(String cmd) {
         switch (cmd) {
@@ -223,17 +207,16 @@ public class LightBot {
                 if (nx >= width) nx = 0;
                 if (ny < 0) ny = height - 1;
                 if (ny >= height) ny = 0;
-                if (map[ny][nx] == '.' || map[ny][nx] == 'O' || map[ny][nx] == 'X')
-                {
+                if (map[ny][nx] == '.' || map[ny][nx] == 'O' || map[ny][nx] == 'X' || map[ny][nx] == 'x') {
                     robotX = nx;
                     robotY = ny;
                 }
                 break;
             case "LEFT":
-                robotDir = (robotDir + 3) % 4;
+                robotDir = (robotDir + 3) % 4;  // Girar a la izquierda
                 break;
             case "RIGHT":
-                robotDir = (robotDir + 1) % 4;
+                robotDir = (robotDir + 1) % 4;  // Girar a la derecha
                 break;
             case "LIGHT":
                 if (map[robotY][robotX] == '.') {
@@ -244,12 +227,10 @@ public class LightBot {
                 break;
         }
     }
-
     // Obtener función por nombre
     public UserFunction getFunction(String name) {
         return functions.get(name);
     }
-
     void pushFrame(List<String> paramNames, List<Integer> argValues) {
         Map<String,Integer> frame = new HashMap<>();
         for (int i = 0; i < paramNames.size(); i++)
@@ -270,11 +251,9 @@ public class LightBot {
             throw new IllegalArgumentException("Parámetro o valor inválido: " + expr);
         }
     }
-
     public int[] getRobotPosition() {
         return new int[]{robotX, robotY};
     }
-
     public String[] getMap() {
         String[] result = new String[height];
         for (int y = 0; y < height; y++)
